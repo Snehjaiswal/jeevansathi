@@ -89,14 +89,32 @@ async function login(req, res) {
     }
     const perenst = await Perents.findOne({ user_id: user._id })
     const about = await About.findOne({ user_id: user._id })
-
+    const userData = await User.aggregate([
+      { $match: { _id: user._id } },
+      {
+        $lookup: {
+          from: 'perents', // Collection name
+          localField: '_id',
+          foreignField: 'user_id',
+          as: 'perenst',
+        },
+      },
+      {
+        $lookup: {
+          from: 'about', // Collection name
+          localField: '_id',
+          foreignField: 'user_id',
+          as: 'about',
+        },
+      },
+    ]);
 
     // Create and send JWT token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: '10d',
     });
 
-    res.status(200).json({ message: 'Login successful', token, user, perenst, about });
+    res.status(200).json({ message: 'Login successful', token , userData: userData[0] });
   } catch (error) {
     console.error('Error during login:', error);
     console.log(error, '-------');
