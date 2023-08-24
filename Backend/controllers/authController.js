@@ -130,6 +130,8 @@ async function login(req, res) {
       expiresIn: '10d',
     });
 
+    
+
     res.status(200).json({ message: 'Login successful', token,user });
   } catch (error) {
     console.error('Error during login:', error);
